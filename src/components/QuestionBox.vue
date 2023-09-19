@@ -9,14 +9,14 @@
 
             <b-list-group>
                 <b-list-group-item v-for="(answer, index) in answers" :key="index" :active="selectedIndex === index"
-                    @click="selectAnswer(index)"
-                    :class="{ 'correct': selectedIndex === index && answer === currentQuestion.correct_answer, 'incorrect': selectedIndex === index && answer !== currentQuestion.correct_answer }">
+                    @click="selectAnswer(index)" :class="answerClass(index)">
                     {{ answer }}
                 </b-list-group-item>
             </b-list-group>
 
-            <b-button variant="primary" href="#">Begin</b-button>
-            <b-button variant="success" href="#" @click="nextQuestion">Next</b-button>
+            <b-button variant="primary" @click="submitAnswer"
+                :disabled="selectedIndex == null || answered">Submit</b-button>
+            <b-button variant="success" @click="nextQuestion">Next</b-button>
         </b-jumbotron>
     </div>
 </template>
@@ -26,7 +26,8 @@ export default {
     name: 'QuestionBox',
     props: {
         currentQuestion: Object,
-        nextQuestion: Function
+        nextQuestion: Function,
+        increment: Function
     },
     computed: {
         answers() {
@@ -36,7 +37,9 @@ export default {
     data() {
         return {
             selectedIndex: null,
-            shuffledAnswers: []
+            correctIndex: null,
+            shuffledAnswers: [],
+            answered: false
         }
     },
     watch: {
@@ -48,6 +51,7 @@ export default {
             handler() {
                 this.selectedIndex = null;
                 this.shuffleAnswers();
+                this.answered = false;
             },
             immediate: true
         }
@@ -77,8 +81,29 @@ export default {
         },
         shuffleAnswers() {
             this.shuffledAnswers = this.shuffle(this.answers);
+            this.correctIndex = this.shuffledAnswers.indexOf(this.currentQuestion.correct_answer)
+        },
+        submitAnswer() {
+            let isCorrect = false;
+            if (this.selectedIndex === this.correctIndex) {
+                isCorrect = true
+            }
+            this.answered = true;
+            this.increment(isCorrect);
+        },
+        answerClass(index) {
+            if (this.answered) {
+                if (index === this.correctIndex) {
+                    return 'correct';
+                } else if (index === this.selectedIndex) {
+                    return 'incorrect';
+                }
+            } else {
+                if (index === this.selectedIndex) {
+                    return 'selected';
+                }
+            }
         }
-
     }
 }
 </script>
@@ -105,6 +130,11 @@ export default {
 
 .incorrect {
     background-color: #dc3545 !important;
+    color: #fff;
+}
+
+.selected {
+    background-color: #007bff !important;
     color: #fff;
 }
 </style>
