@@ -98,10 +98,8 @@ export default {
                 } else if (index === this.selectedIndex) {
                     return 'incorrect';
                 }
-            } else {
-                if (index === this.selectedIndex) {
-                    return 'selected';
-                }
+            } else if (index === this.selectedIndex) {
+                return 'selected';
             }
         }
     }
